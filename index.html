@@ -6,14 +6,12 @@
   <title>Felix Zieger</title>
   <style>
     body {
-      background-color: rgb(63, 61, 61);
-      color: white;
+      background-color: white;
     }
 
-    @media (prefers-color-scheme: light) {
+    @media (prefers-color-scheme: dark) {
       body {
-        background-color: white;
-        color: rgb(63, 61, 61);
+        background-color: black;
       }
 
       img {
@@ -22,8 +20,13 @@
       }
     }
 
+    @media screen and (max-width: 60em) {
+      img {
+        display: block;
+      }
+    }
+
     section {
-      padding: 1em;
       position: absolute;
       top: 50%;
       left: 50%;
@@ -32,10 +35,8 @@
     }
 
     img {
-      min-height: 5vw;
-      min-width: 5vh;
-      max-width: 15vw;
-      max-height: 15vh;
+      height: 10em;
+      width: 10em;
       padding: 1em;
     }
   </style>
@@ -43,9 +44,9 @@
 
 <body>
   <section>
-    <a href="https://github.com/felixzieger/"><img src="assets/github.png" alt="github"></a><a
-      href="https://de.linkedin.com/in/felixzieger"><img src="assets/linkedin.png" alt="linkedin"></a><a
-      href="https://blog.felixzieger.de/"><img src="assets/bicycle.png" alt="bicycle"></a>
+    <a href="https://github.com/felixzieger/"><img src="assets/github.svg" alt="github"></a><a
+      href="https://de.linkedin.com/in/felixzieger"><img src="assets/linkedin.svg" alt="linkedin"></a><a
+      href="https://blog.felixzieger.de/"><img src="assets/blog.svg" alt="blog"></a>
   </section>
 </body>
 
