@@ -6,53 +6,115 @@
   <meta name="viewport" content="width=device-width, user-scalable=no" />
 
   <script defer data-domain="felixzieger.de" src="https://plausible.sonnenhof-zieger.de/js/script.outbound-links.js"></script>
-  
+
   <title>Felix Zieger</title>
   <link rel="icon" type="image/x-icon" href="assets/favicon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <style>
     body {
-      background-color: white;
+      font-family: 'Roboto', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      transition: background-color 0.2s, color 0.2s;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
     }
 
     @media (prefers-color-scheme: dark) {
       body {
         background-color: black;
+        color: white;
       }
 
-      img {
-        -webkit-filter: invert(100%);
-        filter: invert(100%);
+      li a {
+        background-color: white;
+        color: black;
+        border: 1px solid white;
+      }
+
+      li a:hover {
+        background-color: #333;
+        color: white;
       }
     }
 
-    @media screen and (max-width: 60em) {
-      img {
-        display: block;
-      }
+    .container {
+      text-align: center;
     }
 
-    section {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      margin-right: -50%;
-      transform: translate(-50%, -50%);
+    h1 {
+      font-size: 1.5em;
+      margin-bottom: 1em;
     }
 
-    img {
-      height: 11em;
-      width: 11em;
-      padding: 1em;
+    ul {
+      list-style: none;
+      padding: 0;
+      text-align: center;
+    }
+
+    li {
+      margin: 1em 0;
+    }
+
+    li a {
+      text-decoration: none;
+      display: inline-block;
+      padding: 10px;
+      min-width: 150px;
+      background-color: black;
+      color: white;
+      border-radius: 5px;
+      font-size: 1.2em;
+      transition: background-color 0.2s;
+    }
+
+    li a:hover {
+      background-color: #333;
+    }
+
+    .fa-icon {
+      margin-right: 0.5em;
+    }
+
+    .profile-image {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    .profile-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-text {
+      font-size: 1.2em;
+      margin-top: 1em;
     }
   </style>
 </head>
 
 <body>
-  <section>
-    <a href="https://github.com/felixzieger/"><img src="assets/github.svg" alt="github"></a><a
-      href="https://de.linkedin.com/in/felixzieger"><img src="assets/linkedin.svg" alt="linkedin"></a><a
-      href="https://blog.felixzieger.de/"><img src="assets/blog.svg" alt="blog"></a>
-  </section>
+  <div class="container">
+    <div class="profile-image">
+      <img src="assets/me.jpg" alt="Profile Image">
+    </div>
+    <h1>Felix Zieger</h1>
+    <p class="profile-text">Welcome to my corner of the internet!</p>
+    <ul>
+      <li><a href="https://github.com/felixzieger/"><i class="fab fa-github fa-icon"></i>GitHub</a></li>
+      <li><a href="https://de.linkedin.com/in/felixzieger"><i class="fab fa-linkedin fa-icon"></i>LinkedIn</a></li>
+      <li><a href="https://blog.felixzieger.de/"><i class="fas fa-blog fa-icon"></i>Blog</a></li>
+      <li><a href="https://notes.felixzieger.de/"><i class="fas fa-sticky-note fa-icon"></i>Notes</a></li>
+    </ul>
+  </div>
 </body>
 
 </html>
