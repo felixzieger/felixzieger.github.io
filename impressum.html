@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impressum und Datenschutzerklärung</title>
+</head>
+<body>
+    <header>
+        <h1>Impressum und ViSdP</h1>
+    </header>
+
+    <section>
+        <h2>Felix Zieger</h2>
+        <p>Bartholomäusweg 51<br>
+        63762 Großostheim</p>
+
+        <p>Email für Abmahnungen: <a href="mailto:abmahnung@felixzieger.de">felix-abmahnung@felixzieger.de</a></p>
+    </section>
+
+    <section>
+        <h2>Datenschutzerklärung</h2>
+        <p>Der Webserver schreibt Logdateien mit den Zugriffen und den IP-Adressen der Zugreifer. Die Webseite nutzt Plausible Analytics, um Zugriffszahlen zu ermitteln.</p>
+
+        <p>Hier die Erklärung der Daten, die Plausible erhebt:</p>
+        <pre>
+We generate a daily changing identifier using the visitor’s IP address and User-Agent. 
+To anonymize these datapoints and make them impossible to relate back to the user, 
+we run them through a hash function with a rotating salt.
+
+hash(daily_salt + website_domain + ip_address + user_agent)
+        </pre>
+    </section>
+</body>
+</html>
