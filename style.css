@@ -83,8 +83,13 @@ li a:hover, .project-links a:hover {
   background-color: #333;
 }
 
-.fa-icon {
+.icon {
+  width: 1.125em;
+  height: 1em;
   margin-right: 0.5em;
+  vertical-align: -0.125em;
+  fill: currentColor;
+  display: inline-block;
 }
 
 /* Index page specific styles */
