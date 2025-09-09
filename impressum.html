@@ -19,19 +19,22 @@
             margin-bottom: 1em;
         }
 
-        .container pre {
-            background-color: #f5f5f5;
-            padding: 1em;
-            border-radius: 5px;
-            overflow-x: auto;
+        .container blockquote {
+            border-left: 4px solid #ccc;
             margin: 1em 0;
-            font-size: 0.9em;
-            line-height: 1.4;
+            padding-left: 1em;
+            font-style: italic;
+            color: #666;
         }
 
         @media (prefers-color-scheme: dark) {
-            .container pre {
-                background-color: #333;
+            .container blockquote {
+                border-left-color: #666;
+                color: white;
+            }
+            
+            .container a {
+                color: white;
             }
         }
     </style>
@@ -56,13 +59,12 @@
                 Plausible Analytics, um Zugriffszahlen zu ermitteln.</p>
 
             <p>Hier die Erklärung der Daten, die Plausible erhebt:</p>
-            <pre>
+            <blockquote style="border-left: 4px solid #ccc; margin: 1em 0; padding-left: 1em; font-style: italic; color: #666;">
                 We generate a daily changing identifier using the visitor's IP address and User-Agent.
                 To anonymize these datapoints and make them impossible to relate back to the user,
-                we run them through a hash function with a rotating salt.
-
-                hash(daily_salt + website_domain + ip_address + user_agent)
-            </pre>
+                we run them through a hash function with a rotating salt.<br><br>
+                <code>hash(daily_salt + website_domain + ip_address + user_agent)</code>
+            </blockquote>
         </section>
 
         <a href="index.html" class="back-link">← Zurück zur Startseite</a>
