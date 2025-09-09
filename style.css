@@ -181,8 +181,8 @@ li {
 }
 
 footer {
-  position: fixed;
-  bottom: 20px;
+  margin-top: 40px;
+  padding: 20px 0;
   width: 100%;
   text-align: center;
 }
