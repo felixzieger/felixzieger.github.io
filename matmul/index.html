@@ -12,6 +12,7 @@
     src="https://plausible.sonnenhof-zieger.de/js/script.outbound-links.js"></script>
   <style>
     :root {
+      --bg: #fff;
       --ink: #000;
       --faint: #c9c9c9;
       --glow: #ececec;
@@ -26,12 +27,23 @@
     @media (max-width: 520px)  { :root { --c: 25px; --gap: 12px; } }
     @media (max-width: 400px)  { :root { --c: 21px; --gap: 8px; } }
 
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000;
+        --ink: #fff;
+        --faint: #4d4d4d;
+        --glow: #2b2b2b;
+        --band: rgba(255, 255, 255, .07);
+      }
+      footer a { border-bottom-color: #222; }
+    }
+
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
       padding: 32px 12px 24px;
-      background: #fff;
+      background: var(--bg);
       color: var(--ink);
       font-family: "Latin Modern Roman", "Computer Modern Serif", Cambria, "Times New Roman", Times, serif;
       display: flex;
