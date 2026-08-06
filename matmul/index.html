@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+    content="Matrix multiplication, visualized so that row times column happens where you look: B sits above the product, A sits left of it.">
+  <title>Matrix Multiplication</title>
+  <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+  <script defer data-domain="felixzieger.de"
+    src="https://plausible.sonnenhof-zieger.de/js/script.outbound-links.js"></script>
+  <style>
+    :root {
+      --ink: #000;
+      --faint: #c9c9c9;
+      --glow: #ececec;
+      --band: rgba(0, 0, 0, .045);
+      --c: 50px;
+      --gap: 34px;
+    }
+
+    @media (max-width: 1020px) { :root { --c: 44px; --gap: 28px; } }
+    @media (max-width: 860px)  { :root { --c: 38px; --gap: 24px; } }
+    @media (max-width: 700px)  { :root { --c: 30px; --gap: 18px; } }
+    @media (max-width: 520px)  { :root { --c: 25px; --gap: 12px; } }
+    @media (max-width: 400px)  { :root { --c: 21px; --gap: 8px; } }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 32px 12px 24px;
+      background: #fff;
+      color: var(--ink);
+      font-family: "Latin Modern Roman", "Computer Modern Serif", Cambria, "Times New Roman", Times, serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-height: 100vh;
+    }
+
+    /* ---------- the L-shaped board ---------- */
+    /*        B          B above the product
+     *   A    C          A left of the product
+     */
+    .stage { position: relative; }
+
+    .board {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: auto auto;
+      grid-template-rows: auto auto;
+      column-gap: var(--gap);
+      row-gap: var(--gap);
+      align-items: start;
+      justify-items: start;
+    }
+
+    .corner {
+      align-self: end;
+      justify-self: end;
+      text-align: right;
+      color: var(--faint);
+      font-size: calc(var(--c) * .30);
+      line-height: 1.45;
+      padding: 0 2px 6px 0;
+      max-width: calc(var(--c) * 5.2);
+    }
+    .corner i { font-style: italic; }
+    @media (max-width: 520px) { .corner { display: none; } }
+    .corner sub { font-size: .8em; font-style: italic; vertical-align: -.25em; }
+
+    .matrix { position: relative; padding: 10px calc(var(--c) * .8); }
+    .matrix::before,
+    .matrix::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: calc(var(--c) * .26);
+      border: 1.6px solid var(--ink);
+    }
+    .matrix::before { left: 0; border-right: none; }
+    .matrix::after { right: 0; border-left: none; }
+
+    .matrix .name {
+      position: absolute;
+      font-style: italic;
+      font-size: calc(var(--c) * .42);
+      color: var(--faint);
+    }
+    #wB .name { top: calc(var(--c) * -.62); left: 50%; transform: translateX(-50%); }
+    #wA .name { bottom: calc(var(--c) * -.62); left: 50%; transform: translateX(-50%); }
+    #wC .name { bottom: calc(var(--c) * -.62); left: 50%; transform: translateX(-50%); }
+
+    .cells { display: grid; grid-template-columns: repeat(4, var(--c)); gap: calc(var(--c) * .16); }
+
+    .cell {
+      width: var(--c);
+      height: var(--c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: calc(var(--c) * .52);
+      font-variant-numeric: lining-nums tabular-nums;
+      position: relative;
+      transition: color 300ms ease;
+    }
+
+    .cell.blank { color: transparent; }
+
+    .cell.target::after {
+      content: '';
+      position: absolute;
+      left: 15%;
+      right: 15%;
+      bottom: 15%;
+      border-bottom: 1.5px solid var(--faint);
+    }
+
+    .cell.pop { animation: pop 420ms ease; }
+    @keyframes pop {
+      0% { transform: scale(.3); }
+      60% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    .cell.hot {
+      font-weight: 700;
+      background: radial-gradient(circle at 50% 50%, var(--glow) 0 40%, transparent 41%);
+    }
+
+    /* ---------- the two bands whose crossing is the answer ---------- */
+    .band {
+      position: absolute;
+      z-index: 0;
+      background: var(--band);
+      opacity: 0;
+      transition:
+        top 460ms cubic-bezier(.6, .02, .3, 1),
+        left 400ms cubic-bezier(.6, .02, .3, 1),
+        width 400ms cubic-bezier(.6, .02, .3, 1),
+        height 460ms cubic-bezier(.6, .02, .3, 1),
+        opacity 260ms ease;
+    }
+
+    .cross {
+      position: absolute;
+      z-index: 0;
+      border: 1.5px solid var(--faint);
+      opacity: 0;
+      transition:
+        top 460ms cubic-bezier(.6, .02, .3, 1),
+        left 400ms cubic-bezier(.6, .02, .3, 1),
+        opacity 260ms ease;
+    }
+
+    /* ---------- equation ---------- */
+    #eq {
+      position: relative;
+      width: 100%;
+      height: 88px;
+      margin-top: 30px;
+      font-size: 24px;
+      white-space: pre;
+      letter-spacing: .01em;
+      --anchor: 135px;
+    }
+    .eqline { position: absolute; left: 0; right: 0; height: 40px; line-height: 40px; }
+    #line1 { top: 0; }
+    #line2 { top: 42px; }
+    .eqline .lhs { position: absolute; right: calc(50% + var(--anchor)); text-align: right; }
+    .eqline .rhs { position: absolute; left: calc(50% - var(--anchor)); }
+    @media (max-width: 700px) { #eq { font-size: 17px; --anchor: 100px; } }
+    @media (max-width: 400px) { #eq { font-size: 14px; --anchor: 84px; } }
+    #eq .t { opacity: 0; animation: fade 130ms ease forwards; }
+    @keyframes fade { to { opacity: 1; } }
+    #eq .vec { font-style: italic; }
+    #eq sub { font-size: .62em; font-style: normal; vertical-align: -.25em; }
+    #eq sub i { font-style: italic; }
+
+    .flyer {
+      position: fixed;
+      z-index: 30;
+      pointer-events: none;
+      font-family: inherit;
+      font-size: calc(var(--c) * .52);
+      width: var(--c);
+      height: var(--c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    footer {
+      margin-top: auto;
+      padding-top: 24px;
+      font-size: 14px;
+      color: var(--faint);
+    }
+    footer a { color: var(--faint); text-decoration: none; border-bottom: 1px solid #eee; }
+    footer a:hover { color: var(--ink); border-bottom-color: var(--faint); }
+  </style>
+</head>
+
+<body>
+
+  <div class="stage" id="stage">
+    <div class="band" id="bandRow"></div>
+    <div class="band" id="bandCol"></div>
+    <div class="cross" id="cross"></div>
+
+    <div class="board">
+      <div class="corner">
+        row <i>i</i> of <i>A</i> and column <i>j</i> of <i>B</i><br>
+        cross at <i>c</i><sub>ij</sub>
+      </div>
+      <div class="matrix" id="wB">
+        <span class="name">B</span>
+        <div class="cells" id="mB"></div>
+      </div>
+      <div class="matrix" id="wA">
+        <span class="name">A</span>
+        <div class="cells" id="mA"></div>
+      </div>
+      <div class="matrix" id="wC">
+        <span class="name">AB</span>
+        <div class="cells" id="mC"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="eq"></div>
+
+  <footer>
+    <a href="https://felixzieger.de/">felixzieger.de</a> &middot; after
+    <a href="https://lacker.io/matmul/">lacker.io/matmul</a>
+  </footer>
+
+  <script>
+    const N = 4;
+
+    let A = [], B = [], C = [];
+    let cellsA = [], cellsB = [], cellsC = [];
+    let cur = { i: -1, j: -1 };
+
+    const $ = id => document.getElementById(id);
+    const eq = $('eq');
+    const stage = $('stage');
+    const bandRow = $('bandRow');
+    const bandCol = $('bandCol');
+    const cross = $('cross');
+
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const dur = ms => ms + 'ms';
+
+    /* ---------------- setup ---------------- */
+
+    const randMatrix = () =>
+      Array.from({ length: N }, () => Array.from({ length: N }, () => Math.floor(Math.random() * 10)));
+
+    function buildMatrix(host, values, blank) {
+      host.innerHTML = '';
+      const cells = [];
+      for (let i = 0; i < N; i++) {
+        cells.push([]);
+        for (let j = 0; j < N; j++) {
+          const d = document.createElement('div');
+          d.className = 'cell' + (blank ? ' blank' : '');
+          d.textContent = blank ? '' : values[i][j];
+          host.appendChild(d);
+          cells[i].push(d);
+        }
+      }
+      return cells;
+    }
+
+    function reset() {
+      cur = { i: -1, j: -1 };
+      A = randMatrix();
+      B = randMatrix();
+      C = Array.from({ length: N }, () => Array(N).fill(null));
+      cellsA = buildMatrix($('mA'), A, false);
+      cellsB = buildMatrix($('mB'), B, false);
+      cellsC = buildMatrix($('mC'), C, true);
+      document.querySelectorAll('.flyer').forEach(n => n.remove());
+      bandRow.style.opacity = 0;
+      bandCol.style.opacity = 0;
+      cross.style.opacity = 0;
+      eq.innerHTML = '';
+    }
+
+    /* ---------------- geometry ---------------- */
+
+    const rectIn = el => {
+      const s = stage.getBoundingClientRect(), r = el.getBoundingClientRect();
+      return { left: r.left - s.left, top: r.top - s.top, right: r.right - s.left, bottom: r.bottom - s.top, w: r.width, h: r.height };
+    };
+
+    /* the horizontal band: row i of A, continued straight through row i of the product */
+    function layoutRowBand(i) {
+      const a = rectIn(cellsA[i][0]);
+      const c = rectIn(cellsC[i][N - 1]);
+      const pad = a.h * 0.16;
+      bandRow.style.top = (a.top - pad / 2) + 'px';
+      bandRow.style.height = (a.h + pad) + 'px';
+      bandRow.style.left = (a.left - pad) + 'px';
+      bandRow.style.width = (c.right - a.left + 2 * pad) + 'px';
+      bandRow.style.opacity = 1;
+    }
+
+    /* the vertical band: column j of B, continued straight down through column j of the product */
+    function layoutColBand(j) {
+      const b = rectIn(cellsB[0][j]);
+      const c = rectIn(cellsC[N - 1][j]);
+      const pad = b.w * 0.16;
+      bandCol.style.left = (b.left - pad / 2) + 'px';
+      bandCol.style.width = (b.w + pad) + 'px';
+      bandCol.style.top = (b.top - pad) + 'px';
+      bandCol.style.height = (c.bottom - b.top + 2 * pad) + 'px';
+      bandCol.style.opacity = 1;
+    }
+
+    /* the outline sitting exactly on the crossing cell of the product */
+    function layoutCross(i, j) {
+      const r = rectIn(cellsC[i][j]);
+      const pad = r.w * 0.16;
+      cross.style.left = (r.left - pad / 2) + 'px';
+      cross.style.top = (r.top - pad / 2) + 'px';
+      cross.style.width = (r.w + pad) + 'px';
+      cross.style.height = (r.h + pad) + 'px';
+      cross.style.opacity = 1;
+    }
+
+    /* ---------------- animation ---------------- */
+
+    async function goRow(i) {
+      cur.i = i;
+      layoutRowBand(i);
+      await sleep(i === 0 ? 340 : 480);
+    }
+
+    async function goCol(i, j) {
+      const first = cur.j < 0;
+      cur.j = j;
+      layoutColBand(j);
+      layoutCross(i, j);
+      await sleep(first ? 400 : 430);
+    }
+
+    async function dotProduct(i, j) {
+      cellsC[i][j].classList.add('target');
+      const ent = (letter, sub) => '<span class="vec">' + letter + '</span><sub>' + sub + '</sub>';
+      eq.innerHTML =
+        '<div class="eqline" id="line1">' +
+        '<span class="lhs t">' + ent('a', (i + 1) + ',<i>k</i>') + ' &middot; ' +
+        ent('b', '<i>k</i>,' + (j + 1)) + '</span>' +
+        '<span class="rhs t"> = ' + ent('c', (i + 1) + ',' + (j + 1)) + '</span>' +
+        '</div>' +
+        '<div class="eqline" id="line2"><span class="rhs" id="rhs"><span class="t"> = </span></span></div>';
+      const rhs = $('rhs');
+
+      let total = 0;
+      for (let k = 0; k < N; k++) {
+        const a = A[i][k], b = B[k][j];
+        total += a * b;
+        cellsA[i][k].classList.add('hot');
+        cellsB[k][j].classList.add('hot');
+        const t = document.createElement('span');
+        t.className = 't';
+        t.innerHTML = (k ? ' + ' : '') + a + ' &middot; ' + b;
+        rhs.appendChild(t);
+        await sleep(175);
+        cellsA[i][k].classList.remove('hot');
+        cellsB[k][j].classList.remove('hot');
+        await sleep(45);
+      }
+
+      const tot = document.createElement('span');
+      tot.className = 't';
+      tot.innerHTML = ' = ' + total;
+      rhs.appendChild(tot);
+      await sleep(320);
+
+      /* the answer drops into the crossing cell */
+      const from = tot.getBoundingClientRect();
+      const to = cellsC[i][j].getBoundingClientRect();
+      const cs = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--c'));
+      const x0 = from.right - cs, y0 = from.top + from.height / 2 - cs / 2;
+      const flyer = document.createElement('div');
+      flyer.className = 'flyer';
+      flyer.textContent = total;
+      Object.assign(flyer.style, {
+        left: x0 + 'px', top: y0 + 'px',
+        transition: 'transform ' + dur(430) + ' cubic-bezier(.5,0,.2,1)'
+      });
+      document.body.appendChild(flyer);
+      void flyer.offsetWidth;
+      flyer.style.transform = `translate(${to.left - x0}px, ${to.top - y0}px)`;
+      await sleep(450);
+
+      flyer.remove();
+      C[i][j] = total;
+      const cc = cellsC[i][j];
+      cc.textContent = total;
+      cc.classList.remove('blank', 'target');
+      cc.classList.add('pop');
+      setTimeout(() => cc.classList.remove('pop'), 500);
+      await sleep(170);
+    }
+
+    /* keep the bands glued to the cells when the window changes size */
+    addEventListener('resize', () => {
+      if (cur.i < 0) return;
+      const keep = [bandRow, bandCol, cross].map(el => el.style.transition);
+      [bandRow, bandCol, cross].forEach(el => el.style.transition = 'none');
+      layoutRowBand(cur.i);
+      if (cur.j >= 0) { layoutColBand(cur.j); layoutCross(cur.i, cur.j); }
+      void stage.offsetWidth;
+      [bandRow, bandCol, cross].forEach((el, n) => el.style.transition = keep[n]);
+    });
+
+    /* runs forever: fill in the product, admire it, then start over with fresh numbers */
+    async function main() {
+      for (; ;) {
+        reset();
+        await sleep(700);
+        for (let i = 0; i < N; i++) {
+          await goRow(i);
+          for (let j = 0; j < N; j++) {
+            await goCol(i, j);
+            await dotProduct(i, j);
+          }
+        }
+        bandRow.style.opacity = 0;
+        bandCol.style.opacity = 0;
+        cross.style.opacity = 0;
+        eq.innerHTML = '';
+        await sleep(2400);
+      }
+    }
+
+    main();
+  </script>
+</body>
+
+</html>
